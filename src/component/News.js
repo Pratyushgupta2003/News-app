@@ -6,19 +6,15 @@ import InfiniteScroll from "react-infinite-scroll-component";
 
 
 const News= (props)=> {
-
   const [articles, setArticles] = useState([]);
   const [load, setLoad] = useState(true);
   const [page, setPage] = useState(1);
   const [totalResult, setTotalResult] = useState(0);
-  // document.title = `${this.capitalizeFLetter(props.category)}-Newsmonkey`
-
 
   const capitalizeFLetter = (string) => {
-    return string[0].toUpperCase() +
+    return string.charAt(0).toUpperCase() +
       string.slice(1);
   }
-
 
   const update = async ()=> {
     props.setprogress(10)
@@ -30,41 +26,38 @@ const News= (props)=> {
     props.setprogress(30)
     let parsedata = await data.json();
     props.setprogress(70)
-    setArticles(articles.concat(parsedata.articles));
+    setArticles(parsedata.articles);
     setLoad(false);
     setTotalResult(parsedata.articles);
     props.setprogress(100)
   }
 
   useEffect(() => {
+      document.title = `${capitalizeFLetter(props.category)}-Newsmonkey`
     update(); 
     // eslint-disable-next-line
 }, [])
 
-
   const fetchMoreData = async () => {
-    const URL = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${props.api}&page=${page}&pageSize=${props.pageSize}`;
+    const URL = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${props.api}&page=${page+1}&pageSize=${props.pageSize}`;
     // `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=461c2d13cfc84dd395cb70f8589cfa85&page=${this.state.page}&pageSize=${props.pageSize}`;
+    setPage(page+1)
     let data = await fetch(URL);
     let parsedata = await data.json();
-    setPage(page+1)
     setArticles(articles.concat(parsedata.articles));
     setTotalResult(parsedata.totalResult);
   };
 
-
-    
-    // const articles = this.state.articles;
     return (
 <>
-        <h1 className="text-center my-3">Newsmonkey - {capitalizeFLetter(props.category)} Top Headlines</h1>
+        <h1 className="text-center" style={{ margin: '35px 0px', marginTop: '90px' }}>Newsmonkey - {capitalizeFLetter(props.category)} Top Headlines</h1>
         
         { load && <Spinner />}
 
       <InfiniteScroll
           dataLength={articles.length}
           next={fetchMoreData}
-          hasMore={totalResult > articles.length}
+          hasMore={totalResult !== articles.length}
           loader={<Spinner/>}
         >
         
@@ -79,22 +72,12 @@ const News= (props)=> {
                 Author={element.author} date={element.publishedAt}
                 place={element.source.name} />
             </div>
-          })
-          }
+          }) }
           </div>
         </div>
         </InfiniteScroll>
-        {/* <div className="container d-flex justify-content-between">
-          <button disabled={this.state.page <= 1} type="button" className="btn btn-dark " onClick={this.handlePrevBtn}>&larr; Prev</button>
-          <button disabled={Math.ceil(this.state.totalResult / props.pageSize) < (this.state.page + 1)} type="button" className="btn btn-dark" onClick={this.handleNextBtn}>Next &rarr;</button>
-        </div> */}
-        
-      
-      
-</>
+        </>
     )
-  
-  
 }
 News.propTypes = {
   pageSize: PropTypes.number,
